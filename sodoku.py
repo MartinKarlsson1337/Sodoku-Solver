@@ -1,4 +1,5 @@
 import csp
+import tkinter
 
 class SodokuTable():
 
@@ -84,7 +85,7 @@ class SodokuTable():
         return (self.get_col_of_var(var_name), self.get_row_of_var(var_name))
 
     def create_constraint_graph(self):
-        for i in range(0,3):
+        for i in range(0,3): # All cells in the same block are neighbours
             for j in range(0,3):
                 block = self.get_block(i, j)
                 for col in block:
@@ -93,29 +94,30 @@ class SodokuTable():
                         self.neighbours[var].extend(block[1])
                         self.neighbours[var].extend(block[2])
 
-        for i in range(0,9):
+        for i in range(0,9): # All cells in the same column are neighbours
             cols = self.get_col(i)
             for var in cols:
                 self.neighbours[var].extend(cols)
 
-        for i in range(0,9):
+        for i in range(0,9): # All cells in the same row are neighbours
             rows = self.get_row(i)
             for var in rows:
                 self.neighbours[var].extend(rows)
 
-        for var in self.neighbours:
+        for var in self.neighbours: # Remove all duplicates
             no_dupes = []
             for neighbour in self.neighbours[var]:
                 if neighbour not in no_dupes and neighbour != var:
                     no_dupes.append(neighbour)
             self.neighbours[var] = no_dupes
                 
-    def solve(self):
+    def solve(self): # Solves CSP and returns it as a SodokuTable
         problem = csp.CSP(self.vars, self.domains, self.neighbours, self.constraint)
         sol = csp.backtracking_search(problem, inference=csp.forward_checking, )
-        return sol
+        return SodokuTable(sol)
 
 
+# Test data
 nums = {'x1' : '9', 'x3' : '1', 'x5': '6', 'x8' : '4',
         'x10' : '2', 'x13' : '1', 'x14' : '4', 'x15' : '9', 'x18': '3',
         'x19' : '3', 'x21' : '6', 'x22' : '5', 'x27' : '1',
@@ -125,17 +127,8 @@ nums = {'x1' : '9', 'x3' : '1', 'x5': '6', 'x8' : '4',
         'x55' : '4', 'x57' : '2', 'x58' : '7', 'x61' : '8', 'x63' : '5',
         'x64' : '5', 'x67' : '8', 'x69' : '4', 'x71' : '3',
         'x75' : '3', 'x77' : '9', 'x78' : '5', 'x80' : '1', 'x81' : '2'}
-test = SodokuTable(nums)
-test.print_table_vars()
 
-problem = csp.CSP(test.vars, test.domains, test.neighbours, test.constraint)
 
-solution = csp.backtracking_search(problem)
-
-solved = SodokuTable(solution)
-
-print("\n")
-solved.print_table()
 
 
 
